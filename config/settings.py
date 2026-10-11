@@ -25,7 +25,20 @@ SECRET_KEY = 'django-insecure-2_#dx*(by590u0l+w1j3+gmkkl*%(o+_&q+%_)-+hrbk%9cyf4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'finbuddy-blush.vercel.app',
+    '.vercel.app',
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://finbuddy-blush.vercel.app',
+    'https://*.vercel.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 
 # Application definition
