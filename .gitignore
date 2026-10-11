@@ -3,9 +3,8 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-*.sqlite3
-db.sqlite3-journal
 *.log
+staticfiles/
 local_settings.py
 .env
 .venv
