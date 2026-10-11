@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FinBuddy - Your Money. Your Goals. Your Control.{% endblock %}</title>
+  <meta name="description" content="FinBuddy is your all-in-one personal finance platform. Track income, monitor expenses, set smart monthly budgets, and reach your savings goals.">
+  
+  <!-- Favicon Icon using Bootstrap Icons -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💳</text></svg>">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FinBuddy Master CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  {% block navbar %}
+  <!-- Public Top Navigation -->
+  <header class="public-navbar">
+    <a href="{% url 'finance:home' %}" class="brand-logo">
+      <i class="bi bi-wallet2"></i>
+      <span>FinBuddy</span>
+      <span class="brand-badge">PRO</span>
+    </a>
+
+    <nav>
+      <ul class="nav-links">
+        <li><a href="{% url 'finance:home' %}"><i class="bi bi-house-door"></i> Home</a></li>
+        <li><a href="{% url 'finance:about' %}"><i class="bi bi-info-circle"></i> About</a></li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'finance:dashboard' %}" class="btn btn-teal btn-sm"><i class="bi bi-grid-fill"></i> Go to Dashboard</a></li>
+          <li><a href="{% url 'finance:logout' %}" class="btn btn-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        {% else %}
+          <li><a href="{% url 'finance:login' %}"><i class="bi bi-box-arrow-in-right"></i> Log In</a></li>
+          <li><a href="{% url 'finance:register' %}" class="btn btn-teal btn-sm"><i class="bi bi-lightning-charge-fill"></i> Get Started Free</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+  {% endblock navbar %}
+
+  <!-- Messages Flash Area -->
+  {% if messages %}
+  <div style="max-width: 1200px; margin: 1.5rem auto 0; padding: 0 1.5rem;">
+    <div class="alert-messages">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          {% if message.tags == 'success' %}
+            <i class="bi bi-check-circle-fill" style="font-size: 1.1rem;"></i>
+          {% elif message.tags == 'warning' %}
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.1rem;"></i>
+          {% elif message.tags == 'danger' or message.tags == 'error' %}
+            <i class="bi bi-x-circle-fill" style="font-size: 1.1rem;"></i>
+          {% else %}
+            <i class="bi bi-info-circle-fill" style="font-size: 1.1rem;"></i>
+          {% endif %}
+          <span>{{ message }}</span>
+        </div>
+        <button type="button" class="alert-close" aria-label="Close">&times;</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Main Content Block -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <!-- Public Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2rem;">
+        <div>
+          <div class="brand-logo" style="color: #ffffff; margin-bottom: 0.5rem;">
+            <i class="bi bi-wallet2" style="color: var(--teal-400);"></i>
+            <span>FinBuddy</span>
+          </div>
+          <p style="color: #94a3b8; max-width: 320px; font-size: 0.9rem;">
+            “Your Money. Your Goals. Your Control.” The modern personal financial management suite engineered for clarity and peace of mind.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 3rem; flex-wrap: wrap;">
+          <div>
+            <h4 style="color: #ffffff; font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Product</h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+              <li><a href="{% url 'finance:home' %}" style="color: #94a3b8;">Features</a></li>
+              <li><a href="{% url 'finance:about' %}" style="color: #94a3b8;">About FinBuddy</a></li>
+              <li><a href="{% url 'finance:register' %}" style="color: #94a3b8;">Create Account</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color: #ffffff; font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Security</h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+              <li style="color: #94a3b8;"><i class="bi bi-shield-check text-teal"></i> User Data Isolation</li>
+              <li style="color: #94a3b8;"><i class="bi bi-lock text-teal"></i> CSRF Protected</li>
+              <li style="color: #94a3b8;"><i class="bi bi-cpu text-teal"></i> Local SQLite Storage</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 FinBuddy Financial Management. All rights reserved.</div>
+        <div style="display: flex; gap: 1.25rem;">
+          <a href="{% url 'finance:home' %}" style="color: #64748b;">Terms</a>
+          <a href="{% url 'finance:about' %}" style="color: #64748b;">Privacy</a>
+          <a href="{% url 'finance:about' %}" style="color: #64748b;">Help Center</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  {% endblock footer %}
+
+  <!-- Core JavaScript -->
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

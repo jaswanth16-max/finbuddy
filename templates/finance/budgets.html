@@ -1,0 +1,173 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Monthly Budgets - FinBuddy{% endblock %}
+{% block dashboard_title %}Budget Management{% endblock %}
+
+{% block dashboard_content %}
+<!-- Header & Controls -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.25rem;">
+      Monthly Category Budgets
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+      Plan your monthly spending limits and monitor consumption in real time.
+    </p>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+    <!-- Month/Year Selector Form -->
+    <form method="get" action="{% url 'finance:budget_list' %}" style="display: flex; gap: 0.5rem; align-items: center;">
+      <select name="month" class="form-select" style="width: auto; padding: 0.45rem 0.85rem; font-size: 0.88rem;" onchange="this.form.submit()">
+        {% for m_num, m_name in month_choices %}
+          <option value="{{ m_num }}" {% if selected_month == m_num %}selected{% endif %}>{{ m_name }}</option>
+        {% endfor %}
+      </select>
+      <select name="year" class="form-select" style="width: auto; padding: 0.45rem 0.85rem; font-size: 0.88rem;" onchange="this.form.submit()">
+        {% for y in year_choices %}
+          <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </form>
+
+    <a href="{% url 'finance:budget_create' %}" class="btn btn-teal btn-sm" id="btn-create-budget">
+      <i class="bi bi-plus-lg"></i> Set New Budget
+    </a>
+  </div>
+</div>
+
+<!-- Warning Notice if Exceeded -->
+{% if exceeded_count > 0 %}
+<div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+  <div style="display: flex; align-items: center; gap: 0.75rem;">
+    <i class="bi bi-exclamation-octagon-fill" style="font-size: 1.3rem;"></i>
+    <div>
+      <strong>Budget Alert:</strong> You have exceeded spending limits on <strong>{{ exceeded_count }}</strong> category budget{{ exceeded_count|pluralize }} this month!
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Budget Summary Cards -->
+<div class="grid-4" style="margin-bottom: 2rem;">
+  <div class="card" style="padding: 1.25rem 1.5rem;">
+    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Budgeted</div>
+    <div style="font-size: 1.6rem; font-weight: 800; color: var(--navy-900); margin-top: 0.25rem;">
+      ${{ total_budgeted|floatformat:2 }}
+    </div>
+    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Allocated limit</div>
+  </div>
+
+  <div class="card" style="padding: 1.25rem 1.5rem;">
+    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Spent</div>
+    <div style="font-size: 1.6rem; font-weight: 800; color: var(--rose-500); margin-top: 0.25rem;">
+      ${{ total_spent|floatformat:2 }}
+    </div>
+    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Actual expenses</div>
+  </div>
+
+  <div class="card" style="padding: 1.25rem 1.5rem;">
+    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Remaining Allowance</div>
+    <div style="font-size: 1.6rem; font-weight: 800; {% if overall_remaining >= 0 %}color: var(--teal-500);{% else %}color: var(--rose-500);{% endif %} margin-top: 0.25rem;">
+      ${{ overall_remaining|floatformat:2 }}
+    </div>
+    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+      {% if overall_remaining >= 0 %}Available to spend{% else %}Deficit over limit{% endif %}
+    </div>
+  </div>
+
+  <div class="card" style="padding: 1.25rem 1.5rem;">
+    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Overall Consumption</div>
+    <div style="font-size: 1.6rem; font-weight: 800; {% if overall_pct > 100 %}color: var(--rose-500);{% elif overall_pct >= 85 %}color: var(--amber-500);{% else %}color: var(--emerald-500);{% endif %} margin-top: 0.25rem;">
+      {{ overall_pct }}%
+    </div>
+    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Of total allocated limit</div>
+  </div>
+</div>
+
+<!-- Category Budgets Grid -->
+{% if budget_cards %}
+<div class="grid-3">
+  {% for item in budget_cards %}
+  <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.25rem;">
+            {{ item.budget.category }}
+          </h3>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">
+            Limit: <strong>${{ item.budget.amount|floatformat:2 }}</strong>
+          </span>
+        </div>
+
+        {% if item.is_exceeded %}
+          <span class="badge badge-danger">
+            <i class="bi bi-exclamation-circle-fill"></i> Exceeded
+          </span>
+        {% elif item.is_warning %}
+          <span class="badge badge-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i> Nearing Limit
+          </span>
+        {% else %}
+          <span class="badge badge-success">
+            <i class="bi bi-check-circle-fill"></i> On Track
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- Spent vs Limit Values -->
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.6rem;">
+        <span style="font-size: 0.9rem; color: var(--text-muted);">Spent:</span>
+        <span style="font-size: 1.25rem; font-weight: 800; {% if item.is_exceeded %}color: var(--rose-500);{% else %}color: var(--navy-900);{% endif %}">
+          ${{ item.spent|floatformat:2 }}
+        </span>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container" style="height: 10px; margin-bottom: 0.75rem;">
+        <div class="progress-bar-fill {% if item.is_exceeded %}fill-rose{% elif item.is_warning %}fill-amber{% else %}fill-teal{% endif %}" style="width: {{ item.percentage|floatformat:0 }}%; max-width: 100%;"></div>
+      </div>
+
+      <!-- Remaining Stat -->
+      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        <span>{{ item.percentage }}% spent</span>
+        <span>
+          {% if item.is_exceeded %}
+            <strong class="text-expense">${{ item.remaining|floatformat:2|slice:"1:" }} over</strong>
+          {% else %}
+            <strong class="text-teal">${{ item.remaining|floatformat:2 }}</strong> remaining
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions Footer -->
+    <div style="border-top: 1px solid var(--border-subtle); padding-top: 0.85rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+      <a href="{% url 'finance:budget_update' item.budget.pk %}" class="btn btn-secondary btn-sm" title="Edit Budget">
+        <i class="bi bi-pencil-square text-teal"></i> Edit
+      </a>
+      <a href="{% url 'finance:budget_delete' item.budget.pk %}" class="btn btn-secondary btn-sm" title="Delete Budget">
+        <i class="bi bi-trash3 text-expense"></i> Delete
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon">
+    <i class="bi bi-pie-chart"></i>
+  </div>
+  <h2 class="empty-state-title">No budgets established for this period</h2>
+  <p class="empty-state-desc">
+    Setting category spending limits is proven to cut unnecessary expenses by up to 30%. Add budgets for Groceries, Dining Out, Entertainment, and more.
+  </p>
+  <a href="{% url 'finance:budget_create' %}" class="btn btn-teal">
+    <i class="bi bi-plus-lg"></i> Create First Monthly Budget
+  </a>
+</div>
+{% endif %}
+
+{% endblock dashboard_content %}

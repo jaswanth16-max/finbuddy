@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log In - FinBuddy{% endblock %}
+
+{% block content %}
+<div style="min-height: calc(100vh - 160px); display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; background: radial-gradient(circle at 50% 30%, rgba(20, 184, 166, 0.08) 0%, rgba(248, 250, 252, 0) 70%);">
+  <div style="max-width: 440px; width: 100%;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="{% url 'finance:home' %}" class="brand-logo" style="display: inline-flex; margin-bottom: 1rem; font-size: 1.6rem;">
+        <i class="bi bi-wallet2"></i>
+        <span>FinBuddy</span>
+      </a>
+      <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.5rem;">
+        Welcome Back
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Log in to access your financial dashboard and budgets
+      </p>
+    </div>
+
+    <div class="card" style="padding: 2.25rem; box-shadow: var(--shadow-lg);">
+      <form method="post" action="{% url 'finance:login' %}">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="margin-bottom: 1.25rem;">
+          <div>{{ form.non_field_errors.0 }}</div>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label" for="id_username">Username</label>
+          <div style="position: relative;">
+            <input type="text" name="username" id="id_username" class="form-control" placeholder="Enter your username" autofocus required>
+          </div>
+          {% if form.username.errors %}
+            <div class="errorlist">{{ form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label class="form-label" for="id_password" style="margin-bottom: 0;">Password</label>
+          </div>
+          <div style="position: relative;">
+            <input type="password" name="password" id="id_password" class="form-control" placeholder="Enter your password" required>
+          </div>
+          {% if form.password.errors %}
+            <div class="errorlist">{{ form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-teal" style="width: 100%; margin-top: 1rem; padding: 0.75rem;" id="btn-submit-login">
+          <i class="bi bi-box-arrow-in-right"></i> Sign In to Dashboard
+        </button>
+      </form>
+
+      <div style="margin-top: 1.75rem; text-align: center; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem; font-size: 0.9rem; color: var(--text-muted);">
+        Don't have an account yet? 
+        <a href="{% url 'finance:register' %}" style="font-weight: 600; color: var(--teal-500);">Create one now &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Quick Demo Tip -->
+    <div style="margin-top: 1.5rem; background: #ffffff; border-radius: var(--radius-md); padding: 0.85rem 1.25rem; border: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.75rem;">
+      <i class="bi bi-info-circle-fill text-teal" style="font-size: 1.1rem;"></i>
+      <span>Tip: You can register a new account instantly, or use the demo generator command.</span>
+    </div>
+
+  </div>
+</div>
+{% endblock content %}

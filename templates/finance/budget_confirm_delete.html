@@ -1,0 +1,34 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Delete Budget - FinBuddy{% endblock %}
+{% block dashboard_title %}Confirm Budget Deletion{% endblock %}
+
+{% block dashboard_content %}
+<div style="max-width: 500px; margin: 3rem auto 0;">
+  <div class="card" style="text-align: center; padding: 2.5rem; box-shadow: var(--shadow-lg);">
+    <div style="width: 60px; height: 60px; border-radius: var(--radius-full); background: #fee2e2; color: var(--rose-500); display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.25rem;">
+      <i class="bi bi-exclamation-triangle"></i>
+    </div>
+    
+    <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.5rem;">
+      Delete Budget?
+    </h2>
+    <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.5rem;">
+      Are you sure you want to delete the budget for <strong>"{{ budget.category }}"</strong> (${{ budget.amount|floatformat:2 }}) for {{ budget.get_month_display }} {{ budget.year }}?
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div style="display: flex; justify-content: center; gap: 1rem;">
+        <a href="{% url 'finance:budget_list' %}?month={{ budget.month }}&year={{ budget.year }}" class="btn btn-secondary">
+          Cancel
+        </a>
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-trash3-fill"></i> Yes, Delete Budget
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock dashboard_content %}

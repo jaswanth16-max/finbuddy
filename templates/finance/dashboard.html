@@ -1,0 +1,333 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - FinBuddy Financial Management{% endblock %}
+{% block dashboard_title %}Financial Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<!-- Welcome & Quick Actions Bar -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.25rem;">
+      Welcome back, {{ user.first_name|default:user.username }} 👋
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+      Here is your live financial snapshot for <strong>{% now "F Y" %}</strong>.
+    </p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{% url 'finance:transactions_list' %}" class="btn btn-secondary btn-sm">
+      <i class="bi bi-clock-history"></i> All Transactions
+    </a>
+    <button type="button" class="btn btn-teal btn-sm" onclick="openModal('quickAddModal')">
+      <i class="bi bi-plus-circle-fill"></i> New Transaction
+    </button>
+  </div>
+</div>
+
+<!-- 4 Key Metric Cards -->
+<div class="grid-4" style="margin-bottom: 2rem;">
+  <!-- Total Income -->
+  <div class="metric-card">
+    <div class="metric-card-header">
+      <span class="metric-label">Total Income</span>
+      <div class="metric-icon-wrap icon-income">
+        <i class="bi bi-arrow-down-left"></i>
+      </div>
+    </div>
+    <div class="metric-value text-income" id="metric-total-income">
+      ${{ total_income|floatformat:2 }}
+    </div>
+    <div class="metric-subtext">
+      <i class="bi bi-wallet2 text-teal"></i> All recorded revenues
+    </div>
+  </div>
+
+  <!-- Total Expenses -->
+  <div class="metric-card">
+    <div class="metric-card-header">
+      <span class="metric-label">Total Expenses</span>
+      <div class="metric-icon-wrap icon-expense">
+        <i class="bi bi-arrow-up-right"></i>
+      </div>
+    </div>
+    <div class="metric-value text-expense" id="metric-total-expenses">
+      ${{ total_expenses|floatformat:2 }}
+    </div>
+    <div class="metric-subtext">
+      <i class="bi bi-credit-card text-muted"></i> All recorded spending
+    </div>
+  </div>
+
+  <!-- Current Net Balance -->
+  <div class="metric-card">
+    <div class="metric-card-header">
+      <span class="metric-label">Current Balance</span>
+      <div class="metric-icon-wrap icon-balance">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+    </div>
+    <div class="metric-value {% if current_balance >= 0 %}text-navy{% else %}text-expense{% endif %}" id="metric-net-balance">
+      ${{ current_balance|floatformat:2 }}
+    </div>
+    <div class="metric-subtext">
+      {% if current_balance >= 0 %}
+        <span class="badge badge-success"><i class="bi bi-shield-check"></i> Net Positive</span>
+      {% else %}
+        <span class="badge badge-danger"><i class="bi bi-exclamation-triangle"></i> Deficit</span>
+      {% endif %}
+      <span style="margin-left: 0.25rem;">Total net equity</span>
+    </div>
+  </div>
+
+  <!-- Monthly Budget Remaining -->
+  <div class="metric-card">
+    <div class="metric-card-header">
+      <span class="metric-label">Budget Remaining</span>
+      <div class="metric-icon-wrap icon-budget">
+        <i class="bi bi-pie-chart"></i>
+      </div>
+    </div>
+    <div class="metric-value {% if monthly_budget_remaining >= 0 %}text-teal{% else %}text-expense{% endif %}" id="metric-budget-remaining">
+      {% if total_monthly_budget > 0 %}
+        ${{ monthly_budget_remaining|floatformat:2 }}
+      {% else %}
+        $0.00
+      {% endif %}
+    </div>
+    <div class="metric-subtext">
+      {% if total_monthly_budget > 0 %}
+        <span>Limit: ${{ total_monthly_budget|floatformat:2 }}</span>
+      {% else %}
+        <a href="{% url 'finance:budget_list' %}" class="text-teal" style="font-weight: 600;">+ Set monthly budget</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;" class="grid-2-charts">
+  <!-- 6-Month Cashflow Bar Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="bi bi-bar-chart-line text-teal"></i>
+        <span>6-Month Cashflow Dynamics</span>
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Income vs Spending</span>
+    </div>
+    <div style="height: 280px; position: relative;">
+      <canvas id="cashflowTrendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Income vs Expenses Ratio Doughnut -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="bi bi-pie-chart text-teal"></i>
+        <span>Income vs Expense</span>
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Overall Ratio</span>
+    </div>
+    <div style="height: 280px; position: relative;">
+      <canvas id="incExpChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+  <!-- Expense Breakdown by Category -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="bi bi-tags text-teal"></i>
+        <span>Expense Category Breakdown</span>
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Top Spending Areas</span>
+    </div>
+    <div style="height: 260px; position: relative;">
+      <canvas id="categoryBreakdownChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Monthly Budgets Progress Widget -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="bi bi-speedometer2 text-teal"></i>
+        <span>Active Budgets ({% now "M Y" %})</span>
+      </div>
+      <a href="{% url 'finance:budget_list' %}" style="font-size: 0.85rem; font-weight: 600;">View All &rarr;</a>
+    </div>
+
+    {% if budget_previews %}
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        {% for bp in budget_previews %}
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; font-size: 0.88rem;">
+            <span style="font-weight: 600; color: var(--navy-900);">{{ bp.budget.category }}</span>
+            <span>
+              <strong>${{ bp.spent|floatformat:2 }}</strong> of ${{ bp.budget.amount|floatformat:2 }}
+              <span class="badge {% if bp.is_exceeded %}badge-danger{% elif bp.is_warning %}badge-warning{% else %}badge-success{% endif %}" style="margin-left: 0.35rem;">
+                {{ bp.percentage }}%
+              </span>
+            </span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar-fill {% if bp.is_exceeded %}fill-rose{% elif bp.is_warning %}fill-amber{% else %}fill-teal{% endif %}" style="width: {{ bp.percentage|floatformat:0 }}%; max-width: 100%;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: 2.5rem 1rem;">
+        <i class="bi bi-pie-chart text-teal" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+        <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem;">No Budgets Set For This Month</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Plan your spending by setting monthly category limits.</p>
+        <a href="{% url 'finance:budget_list' %}" class="btn btn-teal btn-sm"><i class="bi bi-plus-lg"></i> Create First Budget</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Recent Transactions & Savings Goals Row -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;" class="grid-2-recent">
+  <!-- Recent Transactions Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="bi bi-clock-history text-teal"></i>
+        <span>Recent Transactions</span>
+      </div>
+      <a href="{% url 'finance:transactions_list' %}" style="font-size: 0.85rem; font-weight: 600;">View All &rarr;</a>
+    </div>
+
+    {% if recent_transactions %}
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Transaction</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in recent_transactions %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: var(--navy-900);">{{ t.title }}</div>
+              {% if t.description %}
+                <div style="font-size: 0.78rem; color: var(--text-muted);">{{ t.description|truncatechars:35 }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge badge-neutral">{{ t.category }}</span>
+            </td>
+            <td style="font-size: 0.85rem; color: var(--text-muted);">
+              {{ t.date|date:"M d, Y" }}
+            </td>
+            <td>
+              {% if t.transaction_type == 'INCOME' %}
+                <span class="badge badge-income"><i class="bi bi-arrow-down-left"></i> Income</span>
+              {% else %}
+                <span class="badge badge-expense"><i class="bi bi-arrow-up-right"></i> Expense</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right; font-weight: 700; font-size: 0.95rem;">
+              {% if t.transaction_type == 'INCOME' %}
+                <span class="text-income">+${{ t.amount|floatformat:2 }}</span>
+              {% else %}
+                <span class="text-expense">-${{ t.amount|floatformat:2 }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i class="bi bi-receipt"></i>
+      </div>
+      <div class="empty-state-title">No transactions recorded yet</div>
+      <p class="empty-state-desc">Start adding your income and expenses to see your real-time cashflow graphs and summaries.</p>
+      <button type="button" class="btn btn-teal" onclick="openModal('quickAddModal')">
+        <i class="bi bi-plus-lg"></i> Add Your First Transaction
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Savings Goals Widget -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="bi bi-piggy-bank text-teal"></i>
+        <span>Savings Goals</span>
+      </div>
+      <a href="{% url 'finance:savings_goal_list' %}" style="font-size: 0.85rem; font-weight: 600;">View All &rarr;</a>
+    </div>
+
+    {% if savings_goals %}
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        {% for g in savings_goals %}
+        <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md); background: #ffffff;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div>
+              <div style="font-weight: 700; color: var(--navy-900); font-size: 0.95rem;">{{ g.name }}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">
+                Target: ${{ g.target_amount|floatformat:2 }}
+                {% if g.target_date %} &bull; Due {{ g.target_date|date:"M Y" }}{% endif %}
+              </div>
+            </div>
+            <span class="badge {% if g.is_completed %}badge-success{% else %}badge-income{% endif %}">
+              {{ g.get_percentage }}%
+            </span>
+          </div>
+          
+          <div class="progress-container" style="margin-bottom: 0.5rem;">
+            <div class="progress-bar-fill fill-teal" style="width: {{ g.get_percentage }}%;"></div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+            <span style="color: var(--text-muted);">Saved: <strong class="text-navy">${{ g.current_amount|floatformat:2 }}</strong></span>
+            <span style="color: var(--text-muted);">To go: <strong>${{ g.get_remaining_amount|floatformat:2 }}</strong></span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: 2.5rem 1rem;">
+        <i class="bi bi-piggy-bank text-teal" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+        <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem;">No Active Goals</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Set up an emergency fund or milestone target.</p>
+        <a href="{% url 'finance:savings_goal_list' %}" class="btn btn-teal btn-sm"><i class="bi bi-plus-lg"></i> Add Savings Goal</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock dashboard_content %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/charts.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Dashboard Chart.js
+    const chartConfig = {
+      incExpLabels: {{ chart_inc_exp_labels|safe }},
+      incExpData: {{ chart_inc_exp_data|safe }},
+      catLabels: {{ chart_cat_labels|safe }},
+      catData: {{ chart_cat_data|safe }},
+      monthsLabels: {{ chart_months_labels|safe }},
+      monthlyIncome: {{ chart_monthly_income_data|safe }},
+      monthlyExpense: {{ chart_monthly_expense_data|safe }}
+    };
+    initDashboardCharts(chartConfig);
+  });
+</script>
+{% endblock extra_scripts %}

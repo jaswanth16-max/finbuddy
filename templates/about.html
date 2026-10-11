@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About FinBuddy - Our Mission & Story{% endblock %}
+
+{% block content %}
+<div style="background: radial-gradient(circle at 50% 10%, rgba(20, 184, 166, 0.1) 0%, rgba(248, 250, 252, 0) 70%); padding: 4.5rem 2rem 3rem;">
+  <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <span class="brand-badge">Our Story</span>
+    <h1 style="font-size: 2.75rem; font-weight: 800; margin-top: 0.75rem; margin-bottom: 1rem; color: var(--navy-900);">
+      Empowering Financial Freedom, One Decision at a Time
+    </h1>
+    <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.6;">
+      FinBuddy was conceived with a simple yet ambitious vision: to eliminate financial anxiety by replacing complex spreadsheets and invasive fintech apps with a private, intuitive, and reliable companion.
+    </p>
+  </div>
+</div>
+
+<div style="max-width: 900px; margin: 0 auto 5rem; padding: 0 1.5rem;">
+  <!-- Mission Statement Card -->
+  <div class="card" style="margin-bottom: 2.5rem; padding: 2.5rem;">
+    <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+      <div style="width: 56px; height: 56px; border-radius: var(--radius-md); background: var(--teal-50); color: var(--teal-500); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; flex-shrink: 0;">
+        <i class="bi bi-compass"></i>
+      </div>
+      <div>
+        <h2 style="font-size: 1.45rem; font-weight: 700; margin-bottom: 0.75rem;">Our Mission: “Your Money. Your Goals. Your Control.”</h2>
+        <p style="color: var(--text-body); font-size: 1rem; line-height: 1.7;">
+          Personal financial management shouldn't require surrendering your banking passwords to third-party data aggregators or wrestling with clunky user interfaces. FinBuddy puts you back in the driver's seat by combining robust accounting integrity with a clean, modern aesthetic.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 Guiding Pillars -->
+  <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center;">The 4 FinBuddy Principles</h2>
+  
+  <div class="grid-2" style="margin-bottom: 3.5rem;">
+    <div class="card">
+      <div style="font-size: 1.5rem; color: var(--teal-500); margin-bottom: 0.75rem;">
+        <i class="bi bi-eye"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">1. Radical Clarity</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        You can't manage what you don't measure. Real-time balance calculations and visual expense charts provide an immediate snapshot of your net cashflow.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 1.5rem; color: var(--blue-600); margin-bottom: 0.75rem;">
+        <i class="bi bi-bullseye"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">2. Intentional Spending</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Budgets aren't restrictions—they are permissions to spend with confidence. Set realistic monthly limits and avoid end-of-month surprises.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 1.5rem; color: var(--emerald-500); margin-bottom: 0.75rem;">
+        <i class="bi bi-trophy"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">3. Milestone Motivation</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Whether it's building a 6-month safety net or funding your dream travel plans, dynamic savings trackers turn daunting numbers into achievable steps.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 1.5rem; color: var(--rose-500); margin-bottom: 0.75rem;">
+        <i class="bi bi-shield-lock"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">4. Uncompromising Privacy</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Your financial details belong solely to you. FinBuddy stores your data safely in your local database with strict user authorization boundaries.
+      </p>
+    </div>
+  </div>
+
+  <!-- Tech Stack Note -->
+  <div style="background: #f1f5f9; border-radius: var(--radius-lg); padding: 2rem; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 1.5rem;">
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.35rem;">Built with Trusted Technologies</h3>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+        Powered by Python Django, SQLite, Chart.js, and modern Vanilla CSS.
+      </p>
+    </div>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'finance:register' %}" class="btn btn-teal">
+        <i class="bi bi-lightning-charge-fill"></i> Get Started
+      </a>
+    {% else %}
+      <a href="{% url 'finance:dashboard' %}" class="btn btn-teal">
+        <i class="bi bi-grid-fill"></i> Return to Dashboard
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}

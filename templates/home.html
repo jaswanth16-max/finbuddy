@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FinBuddy - Your Money. Your Goals. Your Control.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div style="max-width: 1000px; margin: 0 auto;">
+    <div class="hero-pill">
+      <i class="bi bi-shield-check"></i>
+      <span>Next-Generation Personal Finance Intelligence</span>
+    </div>
+
+    <h1 class="hero-title">
+      Your Money. Your Goals.<br>
+      <span class="hero-gradient-text">Your Control.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      FinBuddy gives you total clarity over your financial health. Seamlessly log transactions, manage intelligent category budgets, track life milestones, and visualize cashflow—all in one place.
+    </p>
+
+    <div class="hero-cta-group">
+      {% if user.is_authenticated %}
+        <a href="{% url 'finance:dashboard' %}" class="btn btn-teal btn-lg" id="cta-dashboard">
+          <i class="bi bi-grid-fill"></i> Go to Your Dashboard
+        </a>
+      {% else %}
+        <a href="{% url 'finance:register' %}" class="btn btn-teal btn-lg" id="cta-get-started">
+          <i class="bi bi-rocket-takeoff-fill"></i> Get Started Free
+        </a>
+        <a href="{% url 'finance:login' %}" class="btn btn-secondary btn-lg" id="cta-login">
+          <i class="bi bi-box-arrow-in-right"></i> Log In to Account
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Product Preview Card -->
+    <div style="background: #ffffff; border-radius: var(--radius-xl); padding: 1.5rem; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-lg); max-width: 900px; margin: 0 auto; text-align: left;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: #f43f5e;"></div>
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div>
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div>
+          <span style="margin-left: 0.75rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">FinBuddy Financial Command Center</span>
+        </div>
+        <span class="badge badge-success"><i class="bi bi-broadcast"></i> Live Preview</span>
+      </div>
+
+      <div class="grid-4" style="margin-bottom: 1.5rem;">
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">TOTAL INCOME</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--emerald-500);">$8,450.00</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">+12.4% vs last month</div>
+        </div>
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">TOTAL EXPENSES</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--rose-500);">$3,210.50</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Under monthly cap</div>
+        </div>
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">NET BALANCE</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--navy-900);">$5,239.50</div>
+          <div style="font-size: 0.75rem; color: var(--emerald-500); font-weight: 600;">Safe reserves</div>
+        </div>
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">BUDGET REMAINING</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--teal-500);">$1,289.50</div>
+          <div style="font-size: 0.75rem; color: var(--teal-500); font-weight: 600;">68% budget healthy</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: var(--text-muted); background: #f1f5f9; padding: 0.75rem 1rem; border-radius: var(--radius-sm);">
+        <div><i class="bi bi-lightning-charge text-teal"></i> Real-time calculation directly from your local SQLite database.</div>
+        <a href="{% url 'finance:register' %}" class="text-teal" style="font-weight: 600;">Explore Now &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Core Features Section -->
+<section style="padding: 5rem 2rem; max-width: 1200px; margin: 0 auto;">
+  <div style="text-align: center; max-width: 650px; margin: 0 auto 3.5rem;">
+    <span class="brand-badge">Engineered for Simplicity</span>
+    <h2 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.75rem; margin-bottom: 0.75rem;">
+      Everything you need to master your money
+    </h2>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Built with clean Django fundamentals, FinBuddy strips away convoluted bank syncing errors and gives you pure, reliable personal finance power.
+    </p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-box">
+      <div class="feature-icon-wrapper">
+        <i class="bi bi-receipt"></i>
+      </div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Complete Transactions</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Easily record income and expense entries with titles, custom amounts, categories, and dates. Filter by month, search descriptions, and edit entries anytime.
+      </p>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrapper">
+        <i class="bi bi-pie-chart"></i>
+      </div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Intelligent Budgets</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Set spending limits by category for each month. FinBuddy calculates live expenses, shows visual progress bars, and alerts you when you're nearing or exceeding limits.
+      </p>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrapper">
+        <i class="bi bi-piggy-bank"></i>
+      </div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Savings Goals</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Plan for emergency funds, vacations, or major milestones. Track your saved balances, calculate completion percentages, and make quick deposits as you save.
+      </p>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrapper">
+        <i class="bi bi-graph-up"></i>
+      </div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Visual Chart Analytics</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        See where every dollar flows with interactive Chart.js visualizations: Income vs Expense ratios, 6-month cashflow trends, and category breakdowns.
+      </p>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrapper">
+        <i class="bi bi-shield-lock"></i>
+      </div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Privacy & Strict Security</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Each user’s data is fully isolated via Django authentication. Passwords are securely hashed, CSRF protection is enforced, and zero third-party bank logins are required.
+      </p>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrapper">
+        <i class="bi bi-phone"></i>
+      </div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Responsive On Any Device</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Designed cleanly from the ground up for desktop workstations, tablets, and smartphones with an adaptive sidebar drawer and tactile interface.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section style="background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-900) 100%); color: #ffffff; padding: 4.5rem 2rem; text-align: center; margin-top: 2rem;">
+  <div style="max-width: 700px; margin: 0 auto;">
+    <h2 style="font-size: 2.2rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">
+      Take command of your financial future today
+    </h2>
+    <p style="color: #94a3b8; font-size: 1.05rem; margin-bottom: 2rem;">
+      Join FinBuddy now. No credit card, no complex setups, no ads. Just clean personal finance management at your fingertips.
+    </p>
+    <a href="{% url 'finance:register' %}" class="btn btn-teal btn-lg">
+      <i class="bi bi-lightning-charge-fill"></i> Create Your Free Account
+    </a>
+  </div>
+</section>
+{% endblock content %}
